@@ -1,6 +1,8 @@
-module "s3_buckets" {
-  source                 = "./modules/s3_buckets"
-  aws_region             = "us-east-1"
-  inventory_bucket_name  = "my-inventory-bucket"
-  inventory_bucket_prefix = "inventory-reports/"
+provider "aws" {
+  region = var.aws_region
+}
+
+module "s3_bucket_filter" {
+  source     = "./modules/s3_bucket_filter"
+  aws_region = var.aws_region
 }
