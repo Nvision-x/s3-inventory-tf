@@ -10,6 +10,9 @@ resource "null_resource" "list_buckets_by_region" {
       OUTPUT_FILE="${path.module}/../../buckets.csv"
       echo "bucket_name" > "$OUTPUT_FILE"
 
+      DEST_BUCKET="s3-terra-inventory"
+      ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
       aws s3api list-buckets --query "Buckets[].Name" --output text | tr '\t' '\n' | while read bucket; do
         region=$(aws s3api get-bucket-location --bucket "$bucket" --query "LocationConstraint" --output text)
 
@@ -29,21 +32,22 @@ resource "null_resource" "list_buckets_by_region" {
           if [[ -z "$existing_id" ]]; then
             echo "Creating inventory configuration 'terra-s3-inv' for bucket: $bucket"
 
-            aws s3api put-bucket-inventory-configuration --bucket "$bucket" --id "terra-s3-inv" --inventory-configuration '{
-              "Destination": {
-                "S3BucketDestination": {
-                  "AccountId": "'$(aws sts get-caller-identity --query Account --output text)'",
-                  "Bucket": "arn:aws:s3:::'$bucket'",
-                  "Format": "CSV"
+            aws s3api put-bucket-inventory-configuration --bucket "$bucket" --id "terra-s3-inv" --inventory-configuration "{
+              \"Destination\": {
+                \"S3BucketDestination\": {
+                  \"AccountId\": \"${ACCOUNT_ID}\",
+                  \"Bucket\": \"arn:aws:s3:::${DEST_BUCKET}\",
+                  \"Format\": \"CSV\",
+                  \"Prefix\": \"inventory/${bucket}/\"
                 }
               },
-              "IsEnabled": true,
-              "Id": "terra-s3-inv",
-              "IncludedObjectVersions": "All",
-              "Schedule": {
-                "Frequency": "Daily"
+              \"IsEnabled\": true,
+              \"Id\": \"terra-s3-inv\",
+              \"IncludedObjectVersions\": \"All\",
+              \"Schedule\": {
+                \"Frequency\": \"Daily\"
               }
-            }'
+            }"
           else
             echo "Inventory configuration 'terra-s3-inv' already exists for $bucket"
           fi
