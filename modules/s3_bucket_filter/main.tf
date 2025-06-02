@@ -1,10 +1,6 @@
-# Lists all S3 buckets in a specific region
-# Writes them to buckets.csv
-# Checks if each bucket has an inventory configuration named terra-s3-inv If not creates the configuration
-
 resource "null_resource" "list_buckets_by_region" {
   provisioner "local-exec" {
-    command = <<EOT
+    command = <<-"EOT"
       set -e
 
       OUTPUT_FILE="${path.module}/../../buckets.csv"
@@ -33,10 +29,10 @@ resource "null_resource" "list_buckets_by_region" {
             aws s3api put-bucket-inventory-configuration --bucket "$bucket" --id "terra-s3-inv" --inventory-configuration "{
               \"Destination\": {
                 \"S3BucketDestination\": {
-                  \"AccountId\": \"\${ACCOUNT_ID}\",
-                  \"Bucket\": \"arn:aws:s3:::\${DEST_BUCKET}\",
+                  \"AccountId\": \"${ACCOUNT_ID}\",
+                  \"Bucket\": \"arn:aws:s3:::${DEST_BUCKET}\",
                   \"Format\": \"CSV\",
-                  \"Prefix\": \"inventory/\${bucket}/\"
+                  \"Prefix\": \"inventory/${bucket}/\"
                 }
               },
               \"IsEnabled\": true,
@@ -55,4 +51,3 @@ resource "null_resource" "list_buckets_by_region" {
     interpreter = ["/bin/bash", "-c"]
   }
 }
-
