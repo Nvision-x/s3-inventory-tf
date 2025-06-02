@@ -29,7 +29,7 @@ resource "null_resource" "list_buckets_by_region" {
               "Destination": {
                 "S3BucketDestination": {
                   "AccountId": "'$(aws sts get-caller-identity --query Account --output text)'",
-                  "Bucket": "arn:aws:s3:::'$bucket'",
+                  "Bucket": "arn:aws:s3:::'s3-terra-inventory'",
                   "Format": "CSV"
                 }
               },
