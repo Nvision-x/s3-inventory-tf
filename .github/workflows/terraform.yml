@@ -11,6 +11,25 @@ on:
 permissions:
   contents: read
 
+# jobs:
+#   scan:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         region: 
+#           - us-east-1
+#           - us-west-1
+#           - us-west-2
+#           - eu-west-1
+#           - eu-central-1
+#           - ap-southeast-1
+#           - ap-northeast-1
+#           # Add more AWS regions as needed
+#     name: Scan S3 in ${{ matrix.region }}
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v3
+
 jobs:
   terraform:
     name: 'Terraform'
