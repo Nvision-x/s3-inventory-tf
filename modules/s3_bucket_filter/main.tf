@@ -6,7 +6,6 @@ resource "null_resource" "list_buckets_by_region" {
       OUTPUT_FILE="${path.module}/../../buckets.csv"
       echo "bucket_name" > "$OUTPUT_FILE"
 
-      DEST_BUCKET="s3-terra-inventory"
       ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
       aws s3api list-buckets --query "Buckets[].Name" --output text | tr '\t' '\n' | while read bucket; do
@@ -30,7 +29,7 @@ resource "null_resource" "list_buckets_by_region" {
               \"Destination\": {
                 \"S3BucketDestination\": {
                   \"AccountId\": \"${ACCOUNT_ID}\",
-                  \"Bucket\": \"arn:aws:s3:::${DEST_BUCKET}\",
+                  \"Bucket\": \"arn:aws:s3:::s3-terra-inventory\",
                   \"Format\": \"CSV\",
                   \"Prefix\": \"inventory/${bucket}/\"
                 }
