@@ -7,6 +7,7 @@ resource "null_resource" "list_buckets_by_region" {
         # Adjust for us-east-1 which returns "null"
         if [[ "$region" == "${var.aws_region}" || ("$region" == "null" && "${var.aws_region}" == "us-east-1") ]]; then
           echo "Bucket in ${var.aws_region}: $bucket"
+          echo "$bucket" >> buckets.csv
         fi
       done
     EOT
