@@ -1,3 +1,7 @@
+# Lists all S3 buckets in a specific region
+# Writes them to buckets.csv
+# Checks if each bucket has an inventory configuration named terra-s3-inv If not creates the configuration
+
 resource "null_resource" "list_buckets_by_region" {
   provisioner "local-exec" {
     command = <<EOT
