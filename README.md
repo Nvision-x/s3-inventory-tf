@@ -19,8 +19,7 @@ The goal of this module is to provide visibility across your S3 assets by:
 
 ## ⚙️ How It Works
 
-1. **Local Execution with `null_resource`**:
-   - Uses a `local-exec` provisioner to run AWS CLI commands inside Terraform.
+1. **Filter:
    - Filters buckets to include only those within the specified region.
 
 2. **CSV Output**:
