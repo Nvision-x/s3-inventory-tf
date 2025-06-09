@@ -15,8 +15,6 @@ The goal of this module is to provide visibility across your S3 assets by:
 - 🏗️ **Creating the inventory configuration** if it's missing
 - 📤 **Delivering inventory reports** to a central destination bucket (`s3-terra-inventory`)
 
-This is especially useful for compliance, cost tracking, and operational transparency.
-
 ---
 
 ## ⚙️ How It Works
