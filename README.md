@@ -2,8 +2,6 @@
 
 This Terraform module automates the process of **identifying all S3 buckets in a specified AWS region** and **applying an Inventory configuration** (`terra-s3-inv`) to each bucket that doesn't already have it.
 
----
-
 ## 🚀 Purpose
 
 The goal of this module is to provide visibility across your S3 assets by:
@@ -14,8 +12,6 @@ The goal of this module is to provide visibility across your S3 assets by:
 - ✅ **Checking each bucket** for an existing inventory configuration named `terra-s3-inv`
 - 🏗️ **Creating the inventory configuration** if it's missing
 - 📤 **Delivering inventory reports** to a central destination bucket (`s3-terra-inventory`)
-
----
 
 ## ⚙️ How It Works
 
@@ -32,8 +28,6 @@ The goal of this module is to provide visibility across your S3 assets by:
 4. **Cross-Bucket Reporting**:
    - Inventory data is stored in a central bucket (`s3-terra-inventory`) for easier aggregation.
 
----
-
 ## 📎 Requirements
 
 - Terraform >= 1.3.0
@@ -41,14 +35,10 @@ The goal of this module is to provide visibility across your S3 assets by:
 - IAM permissions to list and configure S3 buckets
 - Destination bucket (`s3-terra-inventory`) must already exist
 
----
-
 ## 📁 Outputs
 
 - `buckets.csv` file with all S3 buckets in the selected region
 - GitHub Actions artifact for further audit or CI/CD integrations
-
----
 
 ## ✅ Example Usage
 
@@ -57,22 +47,23 @@ module "s3_inventory_config" {
   source     = "git::https://github.com/Nvision-x/Terraform-S3-Inventory-Configuration.git?ref=v1.0.0"
   aws_region = "eu-central-1"
 }
+```
 
+## Inventory Configuration
 
-Inventory Configuration
+| Field | Required | Description |
+|:--|:--:|:--|
+| Id | ✅ | Unique name for the inventory configuration |
+| IsEnabled | ✅ | Whether the configuration is active |
+| IncludedObjectVersions | ✅ | All or Current — includes all versions or just the latest |
+| Destination | ✅ | Where the inventory report is delivered (another bucket) |
+| Schedule | ✅ | Frequency: Daily or Weekly |
+| Prefix | ❌ | Only include objects with this key prefix |
+| Filter | ❌ | More advanced filter to include only certain objects |
+| OptionalFields | ❌ | List of metadata fields to include in the report |
 
-Field	Required	Description
-Id	✅	Unique name for the inventory configuration
-IsEnabled	✅	Whether the configuration is active
-IncludedObjectVersions	✅	All or Current — includes all versions or just the latest
-Destination	✅	Where the inventory report is delivered (another bucket)
-Schedule	✅	Frequency: Daily or Weekly
-Prefix	❌	Only include objects with this key prefix
-Filter	❌	More advanced filter to include only certain objects
-OptionalFields	❌	List of metadata fields to include in the report
-
-Optional Fields
-
+## Optional Fields
+```
 "OptionalFields": 
   "Size",
   "LastModifiedDate",
@@ -87,3 +78,4 @@ Optional Fields
   "IntelligentTieringAccessTier",
   "BucketKeyStatus",
   "ChecksumAlgorithm"
+```
