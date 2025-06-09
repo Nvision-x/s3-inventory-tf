@@ -6,7 +6,7 @@ This Terraform module automates the process of **identifying all S3 buckets in a
 
 ## 🚀 Purpose
 
-The goal of this module is to provide **visibility and governance** across your S3 assets by:
+The goal of this module is to provide visibility across your S3 assets by:
 
 - 🔍 **Discovering** all S3 buckets that exist in a specific region
 - 📥 **Generating a CSV report** of those buckets
