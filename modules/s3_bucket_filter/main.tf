@@ -1,51 +1,45 @@
-resource "null_resource" "list_buckets_by_region" {
-  provisioner "local-exec" {
-    command = <<EOT
-      set -e
+variable "bucket_names" {
+  description = "List of S3 bucket names to check and configure inventory for"
+  type        = list(string)
+}
 
-      OUTPUT_FILE="${path.module}/../../buckets.csv"
-      echo "bucket_name" > "$OUTPUT_FILE"
+variable "aws_region" {
+  description = "Region to match buckets against"
+  type        = string
+}
 
-      aws s3api list-buckets --query "Buckets[].Name" --output text | tr '\t' '\n' | while read bucket; do
-        region=$(aws s3api get-bucket-location --bucket "$bucket" --query "LocationConstraint" --output text)
+data "aws_caller_identity" "current" {}
 
-        # Normalize "null" (used by us-east-1)
-        if [[ "$region" == "null" ]]; then
-          region="us-east-1"
-        fi
+data "aws_s3_bucket" "buckets" {
+  for_each = toset(var.bucket_names)
+  bucket   = each.key
+}
 
-        if [[ "$region" == "${var.aws_region}" ]]; then
-          echo "Bucket in ${var.aws_region}: $bucket"
-          echo "$bucket" >> "$OUTPUT_FILE"
+locals {
+  filtered_buckets = {
+    for k, v in data.aws_s3_bucket.buckets :
+    k => v if v.region == var.aws_region
+  }
+}
 
-          # Check for existing inventory config
-          inventory_output=$(aws s3api list-bucket-inventory-configurations --bucket "$bucket" 2>/dev/null || echo '{}')
-          existing_id=$(echo "$inventory_output" | jq -r '.InventoryConfigurationList[]?.Id // empty' | grep '^terra-s3-inv$' || true)
+resource "aws_s3_bucket_inventory" "inventory_config" {
+  for_each = local.filtered_buckets
 
-          if [[ -z "$existing_id" ]]; then
-            echo "Creating inventory configuration 'terra-s3-inv' for bucket: $bucket"
+  bucket = each.key
+  name   = "terra-s3-inv"
 
-            aws s3api put-bucket-inventory-configuration --bucket "$bucket" --id "terra-s3-inv" --inventory-configuration '{
-              "Destination": {
-                "S3BucketDestination": {
-                  "AccountId": "'$(aws sts get-caller-identity --query Account --output text)'",
-                  "Bucket": "arn:aws:s3:::'s3-terra-inventory'",
-                  "Format": "CSV"
-                }
-              },
-              "IsEnabled": true,
-              "Id": "terra-s3-inv",
-              "IncludedObjectVersions": "All",
-              "Schedule": {
-                "Frequency": "Daily"
-              }
-            }'
-          else
-            echo "Inventory configuration 'terra-s3-inv' already exists for $bucket"
-          fi
-        fi
-      done
-    EOT
-    interpreter = ["/bin/bash", "-c"]
+  included_object_versions = "All"
+  enabled                  = true
+
+  schedule {
+    frequency = "Daily"
+  }
+
+  destination {
+    bucket {
+      format     = "CSV"
+      bucket_arn = "arn:aws:s3:::s3-terra-inventory"
+      account_id = data.aws_caller_identity.current.account_id
+    }
   }
 }
