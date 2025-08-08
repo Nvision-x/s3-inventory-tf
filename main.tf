@@ -3,6 +3,7 @@ provider "aws" {
 }
 
 module "s3_bucket_filter" {
-  source     = "./modules/s3_bucket_filter"
-  aws_region = var.aws_region
+  source           = "./modules/s3_bucket_filter"
+  aws_region       = var.aws_region
+  bucket_list_file = var.bucket_list_file
 }
