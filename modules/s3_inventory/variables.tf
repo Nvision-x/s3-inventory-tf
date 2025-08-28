@@ -42,8 +42,8 @@ variable "collector_account_id" {
   type        = string
 }
 
-variable "source_account_name" {
-  description = "Name or identifier of the source AWS account"
+variable "source_account_id" {
+  description = "Source AWS account ID"
   type        = string
 }
 

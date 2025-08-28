@@ -35,23 +35,16 @@ variable "environment" {
   description = "Environment name (dev, staging, production)"
   type        = string
   default     = "dev"
-  
+
   validation {
     condition     = contains(["dev", "staging", "production"], var.environment)
     error_message = "Environment must be dev, staging, or production."
   }
 }
 
-# Optional: Source account ID for assume role scenarios
+# Source account ID for inventory path organization
 variable "source_account_id" {
-  description = "The source AWS account ID (aws01, aws02, etc.)"
-  type        = string
-  default     = ""
-}
-
-# Source account name for inventory path organization
-variable "source_account_name" {
-  description = "The name/alias of the source AWS account (used in inventory path: collector-bucket/region/source-account-name/source-bucket/data)"
+  description = "The source AWS account ID (used in inventory path: collector-bucket/region/source-account-id/source-bucket/data)"
   type        = string
   # No default - must be provided
 }

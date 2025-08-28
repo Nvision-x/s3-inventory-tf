@@ -25,7 +25,7 @@ resource "aws_s3_bucket_inventory" "inventory_config" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "${var.region}/${var.source_account_name}/${each.key}/data"
+      prefix     = "${var.region}/${var.source_account_id}/${each.key}/data"
     }
   }
 

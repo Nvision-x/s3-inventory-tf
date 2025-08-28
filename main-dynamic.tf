@@ -2,8 +2,8 @@ terraform {
   required_version = ">= 1.0"
   required_providers {
     aws = {
-      source                = "hashicorp/aws"
-      version               = ">= 4.0"
+      source  = "hashicorp/aws"
+      version = ">= 4.0"
       configuration_aliases = [
         aws.us_east_1,
         aws.us_east_2,
@@ -26,7 +26,7 @@ terraform {
 
 locals {
   bucket_list_content = fileexists(var.bucket_list_file) ? file(var.bucket_list_file) : ""
-  
+
   bucket_entries_from_file = local.bucket_list_content != "" ? [
     for line in split("\n", local.bucket_list_content) :
     {
@@ -35,24 +35,24 @@ locals {
     }
     if trimspace(line) != "" && !startswith(trimspace(line), "#")
   ] : []
-  
+
   bucket_map_from_file = {
     for entry in local.bucket_entries_from_file :
     entry.bucket_name => entry.bucket_region
   }
-  
+
   bucket_map_from_variable = {
     for bucket in var.bucket_names :
     bucket => var.aws_region
   }
-  
+
   all_buckets_to_configure = length(local.bucket_map_from_file) > 0 ? local.bucket_map_from_file : local.bucket_map_from_variable
-  
+
   buckets_by_region = {
     for bucket, region in local.all_buckets_to_configure :
     region => bucket...
   }
-  
+
   unique_regions = toset(values(local.all_buckets_to_configure))
 }
 
@@ -144,7 +144,7 @@ resource "aws_s3_bucket_inventory" "us_east_1" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "us-east-1/${var.source_account_name}/${each.key}/data"
+      prefix     = "us-east-1/${var.source_account_id}/${each.key}/data"
     }
   }
 
@@ -169,7 +169,7 @@ resource "aws_s3_bucket_inventory" "us_east_2" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "us-east-2/${var.source_account_name}/${each.key}/data"
+      prefix     = "us-east-2/${var.source_account_id}/${each.key}/data"
     }
   }
 
@@ -194,7 +194,7 @@ resource "aws_s3_bucket_inventory" "us_west_1" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "us-west-1/${var.source_account_name}/${each.key}/data"
+      prefix     = "us-west-1/${var.source_account_id}/${each.key}/data"
     }
   }
 
@@ -219,7 +219,7 @@ resource "aws_s3_bucket_inventory" "us_west_2" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "us-west-2/${var.source_account_name}/${each.key}/data"
+      prefix     = "us-west-2/${var.source_account_id}/${each.key}/data"
     }
   }
 
@@ -244,7 +244,7 @@ resource "aws_s3_bucket_inventory" "eu_west_1" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "eu-west-1/${var.source_account_name}/${each.key}/data"
+      prefix     = "eu-west-1/${var.source_account_id}/${each.key}/data"
     }
   }
 
@@ -269,7 +269,7 @@ resource "aws_s3_bucket_inventory" "eu_west_2" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "eu-west-2/${var.source_account_name}/${each.key}/data"
+      prefix     = "eu-west-2/${var.source_account_id}/${each.key}/data"
     }
   }
 
@@ -294,7 +294,7 @@ resource "aws_s3_bucket_inventory" "eu_central_1" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "eu-central-1/${var.source_account_name}/${each.key}/data"
+      prefix     = "eu-central-1/${var.source_account_id}/${each.key}/data"
     }
   }
 
@@ -319,7 +319,7 @@ resource "aws_s3_bucket_inventory" "ap_south_1" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "ap-south-1/${var.source_account_name}/${each.key}/data"
+      prefix     = "ap-south-1/${var.source_account_id}/${each.key}/data"
     }
   }
 
@@ -344,7 +344,7 @@ resource "aws_s3_bucket_inventory" "ap_southeast_1" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "ap-southeast-1/${var.source_account_name}/${each.key}/data"
+      prefix     = "ap-southeast-1/${var.source_account_id}/${each.key}/data"
     }
   }
 
@@ -369,7 +369,7 @@ resource "aws_s3_bucket_inventory" "ap_southeast_2" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "ap-southeast-2/${var.source_account_name}/${each.key}/data"
+      prefix     = "ap-southeast-2/${var.source_account_id}/${each.key}/data"
     }
   }
 
@@ -394,7 +394,7 @@ resource "aws_s3_bucket_inventory" "ap_northeast_1" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "ap-northeast-1/${var.source_account_name}/${each.key}/data"
+      prefix     = "ap-northeast-1/${var.source_account_id}/${each.key}/data"
     }
   }
 
@@ -419,7 +419,7 @@ resource "aws_s3_bucket_inventory" "ap_northeast_2" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "ap-northeast-2/${var.source_account_name}/${each.key}/data"
+      prefix     = "ap-northeast-2/${var.source_account_id}/${each.key}/data"
     }
   }
 
@@ -444,7 +444,7 @@ resource "aws_s3_bucket_inventory" "sa_east_1" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "sa-east-1/${var.source_account_name}/${each.key}/data"
+      prefix     = "sa-east-1/${var.source_account_id}/${each.key}/data"
     }
   }
 
@@ -469,7 +469,7 @@ resource "aws_s3_bucket_inventory" "ca_central_1" {
       format     = var.output_format
       bucket_arn = "arn:aws:s3:::${var.collector_bucket_name}"
       account_id = var.collector_account_id
-      prefix     = "ca-central-1/${var.source_account_name}/${each.key}/data"
+      prefix     = "ca-central-1/${var.source_account_id}/${each.key}/data"
     }
   }
 
@@ -489,10 +489,10 @@ output "bucket_inventory_details" {
       bucket_name => {
         inventory_id = config.name
         destination  = config.destination[0].bucket[0].bucket_arn
-        prefix      = config.destination[0].bucket[0].prefix
-        frequency   = config.schedule[0].frequency
-        enabled     = config.enabled
-        region      = "us-east-1"
+        prefix       = config.destination[0].bucket[0].prefix
+        frequency    = config.schedule[0].frequency
+        enabled      = config.enabled
+        region       = "us-east-1"
       }
     },
     {
@@ -500,10 +500,10 @@ output "bucket_inventory_details" {
       bucket_name => {
         inventory_id = config.name
         destination  = config.destination[0].bucket[0].bucket_arn
-        prefix      = config.destination[0].bucket[0].prefix
-        frequency   = config.schedule[0].frequency
-        enabled     = config.enabled
-        region      = "us-east-2"
+        prefix       = config.destination[0].bucket[0].prefix
+        frequency    = config.schedule[0].frequency
+        enabled      = config.enabled
+        region       = "us-east-2"
       }
     },
     {
@@ -511,10 +511,10 @@ output "bucket_inventory_details" {
       bucket_name => {
         inventory_id = config.name
         destination  = config.destination[0].bucket[0].bucket_arn
-        prefix      = config.destination[0].bucket[0].prefix
-        frequency   = config.schedule[0].frequency
-        enabled     = config.enabled
-        region      = "us-west-1"
+        prefix       = config.destination[0].bucket[0].prefix
+        frequency    = config.schedule[0].frequency
+        enabled      = config.enabled
+        region       = "us-west-1"
       }
     },
     {
@@ -522,10 +522,10 @@ output "bucket_inventory_details" {
       bucket_name => {
         inventory_id = config.name
         destination  = config.destination[0].bucket[0].bucket_arn
-        prefix      = config.destination[0].bucket[0].prefix
-        frequency   = config.schedule[0].frequency
-        enabled     = config.enabled
-        region      = "us-west-2"
+        prefix       = config.destination[0].bucket[0].prefix
+        frequency    = config.schedule[0].frequency
+        enabled      = config.enabled
+        region       = "us-west-2"
       }
     },
     {
@@ -533,10 +533,10 @@ output "bucket_inventory_details" {
       bucket_name => {
         inventory_id = config.name
         destination  = config.destination[0].bucket[0].bucket_arn
-        prefix      = config.destination[0].bucket[0].prefix
-        frequency   = config.schedule[0].frequency
-        enabled     = config.enabled
-        region      = "eu-west-1"
+        prefix       = config.destination[0].bucket[0].prefix
+        frequency    = config.schedule[0].frequency
+        enabled      = config.enabled
+        region       = "eu-west-1"
       }
     },
     {
@@ -544,10 +544,10 @@ output "bucket_inventory_details" {
       bucket_name => {
         inventory_id = config.name
         destination  = config.destination[0].bucket[0].bucket_arn
-        prefix      = config.destination[0].bucket[0].prefix
-        frequency   = config.schedule[0].frequency
-        enabled     = config.enabled
-        region      = "eu-west-2"
+        prefix       = config.destination[0].bucket[0].prefix
+        frequency    = config.schedule[0].frequency
+        enabled      = config.enabled
+        region       = "eu-west-2"
       }
     },
     {
@@ -555,10 +555,10 @@ output "bucket_inventory_details" {
       bucket_name => {
         inventory_id = config.name
         destination  = config.destination[0].bucket[0].bucket_arn
-        prefix      = config.destination[0].bucket[0].prefix
-        frequency   = config.schedule[0].frequency
-        enabled     = config.enabled
-        region      = "eu-central-1"
+        prefix       = config.destination[0].bucket[0].prefix
+        frequency    = config.schedule[0].frequency
+        enabled      = config.enabled
+        region       = "eu-central-1"
       }
     },
     {
@@ -566,10 +566,10 @@ output "bucket_inventory_details" {
       bucket_name => {
         inventory_id = config.name
         destination  = config.destination[0].bucket[0].bucket_arn
-        prefix      = config.destination[0].bucket[0].prefix
-        frequency   = config.schedule[0].frequency
-        enabled     = config.enabled
-        region      = "ap-south-1"
+        prefix       = config.destination[0].bucket[0].prefix
+        frequency    = config.schedule[0].frequency
+        enabled      = config.enabled
+        region       = "ap-south-1"
       }
     },
     {
@@ -577,10 +577,10 @@ output "bucket_inventory_details" {
       bucket_name => {
         inventory_id = config.name
         destination  = config.destination[0].bucket[0].bucket_arn
-        prefix      = config.destination[0].bucket[0].prefix
-        frequency   = config.schedule[0].frequency
-        enabled     = config.enabled
-        region      = "ap-southeast-1"
+        prefix       = config.destination[0].bucket[0].prefix
+        frequency    = config.schedule[0].frequency
+        enabled      = config.enabled
+        region       = "ap-southeast-1"
       }
     },
     {
@@ -588,10 +588,10 @@ output "bucket_inventory_details" {
       bucket_name => {
         inventory_id = config.name
         destination  = config.destination[0].bucket[0].bucket_arn
-        prefix      = config.destination[0].bucket[0].prefix
-        frequency   = config.schedule[0].frequency
-        enabled     = config.enabled
-        region      = "ap-southeast-2"
+        prefix       = config.destination[0].bucket[0].prefix
+        frequency    = config.schedule[0].frequency
+        enabled      = config.enabled
+        region       = "ap-southeast-2"
       }
     },
     {
@@ -599,10 +599,10 @@ output "bucket_inventory_details" {
       bucket_name => {
         inventory_id = config.name
         destination  = config.destination[0].bucket[0].bucket_arn
-        prefix      = config.destination[0].bucket[0].prefix
-        frequency   = config.schedule[0].frequency
-        enabled     = config.enabled
-        region      = "ap-northeast-1"
+        prefix       = config.destination[0].bucket[0].prefix
+        frequency    = config.schedule[0].frequency
+        enabled      = config.enabled
+        region       = "ap-northeast-1"
       }
     },
     {
@@ -610,10 +610,10 @@ output "bucket_inventory_details" {
       bucket_name => {
         inventory_id = config.name
         destination  = config.destination[0].bucket[0].bucket_arn
-        prefix      = config.destination[0].bucket[0].prefix
-        frequency   = config.schedule[0].frequency
-        enabled     = config.enabled
-        region      = "ap-northeast-2"
+        prefix       = config.destination[0].bucket[0].prefix
+        frequency    = config.schedule[0].frequency
+        enabled      = config.enabled
+        region       = "ap-northeast-2"
       }
     },
     {
@@ -621,10 +621,10 @@ output "bucket_inventory_details" {
       bucket_name => {
         inventory_id = config.name
         destination  = config.destination[0].bucket[0].bucket_arn
-        prefix      = config.destination[0].bucket[0].prefix
-        frequency   = config.schedule[0].frequency
-        enabled     = config.enabled
-        region      = "sa-east-1"
+        prefix       = config.destination[0].bucket[0].prefix
+        frequency    = config.schedule[0].frequency
+        enabled      = config.enabled
+        region       = "sa-east-1"
       }
     },
     {
@@ -632,10 +632,10 @@ output "bucket_inventory_details" {
       bucket_name => {
         inventory_id = config.name
         destination  = config.destination[0].bucket[0].bucket_arn
-        prefix      = config.destination[0].bucket[0].prefix
-        frequency   = config.schedule[0].frequency
-        enabled     = config.enabled
-        region      = "ca-central-1"
+        prefix       = config.destination[0].bucket[0].prefix
+        frequency    = config.schedule[0].frequency
+        enabled      = config.enabled
+        region       = "ca-central-1"
       }
     }
   )

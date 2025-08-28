@@ -3,7 +3,7 @@
 
 terraform {
   required_version = ">= 1.3.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -15,10 +15,10 @@ terraform {
 # Configure AWS Provider
 provider "aws" {
   region = var.aws_region
-  
+
   # Optional: Use AWS profile for authentication
   # profile = "aws01"
-  
+
   # Optional: Assume role configuration
   # assume_role {
   #   role_arn = "arn:aws:iam::${var.source_account_id}:role/TerraformRole"
@@ -27,22 +27,22 @@ provider "aws" {
 
 # Call the S3 inventory module
 module "s3_inventory" {
-  source = "../"  # Path to the s3-inventory-tf module
-  
+  source = "../" # Path to the s3-inventory-tf module
+
   # AWS region to scan for buckets or default region for buckets in file
   aws_region = var.aws_region
-  
+
   # Path to file containing bucket names and regions
   # If empty or file doesn't exist, will scan all buckets in aws_region
   bucket_list_file = var.bucket_list_file
-  
+
   # Collector account configuration (awsdq account)
   collector_account_id    = var.collector_account_id
   collector_bucket_name   = var.collector_bucket_name
   collector_bucket_region = var.collector_bucket_region
-  
-  # Source account name for inventory path organization
-  source_account_name = var.source_account_name
+
+  # Source account ID for inventory path organization
+  source_account_id = var.source_account_id
 }
 
 # Example: Multiple region deployments
@@ -56,7 +56,7 @@ module "s3_inventory" {
 #   collector_account_id    = var.collector_account_id
 #   collector_bucket_name   = var.collector_bucket_name
 #   collector_bucket_region = var.collector_bucket_region
-#   source_account_name     = var.source_account_name
+#   source_account_id       = var.source_account_id
 # }
 # 
 # module "s3_inventory_eu_west_1" {
@@ -67,7 +67,7 @@ module "s3_inventory" {
 #   collector_account_id    = var.collector_account_id
 #   collector_bucket_name   = var.collector_bucket_name
 #   collector_bucket_region = var.collector_bucket_region
-#   source_account_name     = var.source_account_name
+#   source_account_id       = var.source_account_id
 # }
 
 # Example: Environment-specific deployments
@@ -85,5 +85,5 @@ module "s3_inventory" {
 #   collector_account_id    = var.collector_account_id
 #   collector_bucket_name   = "${var.environment}-s3-inventory"
 #   collector_bucket_region = var.collector_bucket_region
-#   source_account_name     = var.source_account_name
+#   source_account_id       = var.source_account_id
 # }

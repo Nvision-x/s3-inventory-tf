@@ -26,10 +26,6 @@ collector_bucket_region = "eu-central-1"
 # Uncomment to use environment-specific settings
 # environment = "production"
 
-# Optional: Source account ID for assume role scenarios
-# Uncomment and set if using cross-account role assumption
-# source_account_id = "111111111111"
-
-# Source account name/alias for inventory path organization
-# This will be used in the inventory path: collector-bucket/region/source-account-name/source-bucket/data
-source_account_name = "aws01"
+# Source account ID for inventory path organization
+# This will be used in the inventory path: collector-bucket/region/source-account-id/source-bucket/data
+source_account_id = "111111111111"

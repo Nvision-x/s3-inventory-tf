@@ -33,8 +33,8 @@ variable "collector_bucket_region" {
   default     = "eu-central-1"
 }
 
-variable "source_account_name" {
-  description = "The name/alias of the source AWS account (used in inventory path)"
+variable "source_account_id" {
+  description = "The source AWS account ID (used in inventory path)"
   type        = string
 }
 
