@@ -1,6 +1,6 @@
 # 📦 S3 Inventory Configuration for Cross-Account Collection
 
-This Terraform module automates S3 inventory collection from multiple AWS accounts (aws01, aws02, etc.) and sends the inventory data to a centralized collector bucket in the awsdq account.
+This Terraform module automates S3 inventory collection from multiple AWS accounts and sends the inventory data to a centralized collector bucket.
 
 ## 🚀 Purpose
 
@@ -10,14 +10,14 @@ The goal of this module is to provide centralized visibility across S3 assets in
 - 📥 **Generating a CSV report** of those buckets
 - ✅ **Checking each bucket** for an existing inventory configuration named `terra-s3-inv`
 - 🏗️ **Creating the inventory configuration** if it's missing
-- 📤 **Delivering inventory reports** to a central collector bucket in the awsdq account
+- 📤 **Delivering inventory reports** to a central collector bucket
 
 ## 🏗️ Architecture
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│    AWS01        │     │    AWS02        │     │    AWS03        │
-│   Account       │     │   Account       │     │   Account       │
+│  Source Account │     │  Source Account │     │  Source Account │
+│       #1        │     │       #2        │     │       #3        │
 │                 │     │                 │     │                 │
 │ S3 Buckets:     │     │ S3 Buckets:     │     │ S3 Buckets:     │
 │ - bucket-a      │     │ - bucket-x      │     │ - bucket-p      │
@@ -30,15 +30,15 @@ The goal of this module is to provide centralized visibility across S3 assets in
                                  │
                                  ▼
                     ┌─────────────────────────┐
-                    │      AWSDQ Account      │
+                    │    Collector Account    │
                     │                         │
                     │  Collector Bucket:      │
                     │  s3-terra-inventory     │
                     │                         │
-                    │  └── aws01/             │
+                    │  └── account-1/         │
                     │      └── bucket-a/      │
                     │      └── bucket-b/      │
-                    │  └── aws02/             │
+                    │  └── account-2/         │
                     │      └── bucket-x/      │
                     │      └── bucket-y/      │
                     └─────────────────────────┘
@@ -46,7 +46,7 @@ The goal of this module is to provide centralized visibility across S3 assets in
 
 ## ⚙️ How It Works
 
-1. **Deploy Collector Bucket** (One-time setup in awsdq account):
+1. **Deploy Collector Bucket** (One-time setup in collector account):
    - Creates a central S3 bucket with cross-account permissions
    - Configures bucket policies to accept inventory from source accounts
 
@@ -56,7 +56,7 @@ The goal of this module is to provide centralized visibility across S3 assets in
      - **Region-based**: Scans all buckets in the specified AWS region (fallback)
    - **Inventory Setup**:
      - Checks if `terra-s3-inv` inventory configuration exists
-     - Creates configuration pointing to awsdq collector bucket
+     - Creates configuration pointing to collector bucket
    - **Cross-Account Delivery**:
      - S3 service handles secure delivery to collector bucket
 
@@ -65,20 +65,20 @@ The goal of this module is to provide centralized visibility across S3 assets in
 - Terraform >= 1.3.0
 - AWS CLI installed (for local-exec commands)
 - IAM permissions:
-  - **awsdq account**: Permission to create and manage S3 bucket
+  - **Collector account**: Permission to create and manage S3 bucket
   - **Source accounts**: Permission to list and configure S3 inventory
 - AWS account IDs:
-  - awsdq account ID (collector)
-  - All source account IDs (aws01, aws02, etc.)
+  - Collector account ID
+  - All source account IDs
 
 ## 🚀 Setup Instructions
 
-### Step 1: Deploy Collector Bucket in AWSDQ Account
+### Step 1: Deploy Collector Bucket in Collector Account
 
-First, set up the centralized collector bucket in your awsdq account:
+First, set up the centralized collector bucket in your collector account:
 
 ```bash
-cd awsdq-collector-bucket/
+cd collector-bucket/
 cp terraform.tfvars.example terraform.tfvars
 # Edit terraform.tfvars with your source account IDs
 terraform init
@@ -92,11 +92,11 @@ Note the outputs:
 
 ### Step 2: Deploy Inventory Configuration in Each Source Account
 
-For each source account (aws01, aws02, etc.):
+For each source account:
 
 1. Configure AWS CLI for the source account:
    ```bash
-   aws configure --profile aws01
+   aws configure --profile source-account-1
    ```
 
 2. Copy and update the configuration:
@@ -105,14 +105,14 @@ For each source account (aws01, aws02, etc.):
    ```
 
 3. Edit `terraform.tfvars`:
-   - Set `collector_account_id` to the awsdq account ID
+   - Set `collector_account_id` to the collector account ID
    - Set `collector_bucket_name` to match the bucket created in Step 1
    - Configure `aws_region` for the buckets you want to inventory
 
 4. Deploy the configuration:
    ```bash
-   AWS_PROFILE=aws01 terraform init
-   AWS_PROFILE=aws01 terraform apply
+   AWS_PROFILE=source-account-1 terraform init
+   AWS_PROFILE=source-account-1 terraform apply
    ```
 
 5. Repeat for each source account
@@ -263,28 +263,28 @@ module "s3_inventory" {
 
 ## ✅ Example terraform.tfvars Files
 
-### For AWSDQ Account (Collector)
+### For Collector Account
 
 ```hcl
-# awsdq-collector-bucket/terraform.tfvars
+# collector-bucket/terraform.tfvars
 aws_region = "eu-central-1"
 collector_bucket_name = "s3-terra-inventory-collector"
 source_account_ids = [
-  "111111111111",  # aws01 account
-  "222222222222",  # aws02 account
-  "333333333333"   # aws03 account
+  "111111111111",  # source account 1
+  "222222222222",  # source account 2
+  "333333333333"   # source account 3
 ]
 environment = "production"
 inventory_retention_days = 90
 ```
 
-### For Source Accounts (aws01, aws02, etc.)
+### For Source Accounts
 
 ```hcl
 # terraform.tfvars
 aws_region = "eu-central-1"
 bucket_list_file = "buckets.txt"  # Optional
-collector_account_id = "999999999999"  # awsdq account ID
+collector_account_id = "999999999999"  # collector account ID
 collector_bucket_name = "s3-terra-inventory-collector"
 collector_bucket_region = "eu-central-1"
 ```

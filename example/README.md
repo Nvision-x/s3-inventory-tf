@@ -27,7 +27,7 @@ Edit `terraform.tfvars` with your actual values:
 # Your AWS region
 aws_region = "us-east-1"
 
-# Your AWSDQ account ID (collector account)
+# Your collector account ID
 collector_account_id = "999999999999"
 
 # Your collector bucket name
@@ -196,7 +196,7 @@ default-region-bucket
    - Access the specified buckets
 
 2. **Collector Bucket**: The collector bucket must:
-   - Already exist in the AWSDQ account
+   - Already exist in the collector account
    - Have proper cross-account permissions
    - Accept inventory from your source account
 

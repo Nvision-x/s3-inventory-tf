@@ -11,11 +11,11 @@ aws_region = "eu-central-1"
 # Set to empty string "" to scan all buckets in aws_region
 bucket_list_file = "buckets.txt"
 
-# Collector account configuration (AWSDQ account)
-# Replace with your actual awsdq account ID
+# Collector account configuration
+# Replace with your actual collector account ID
 collector_account_id = "999999999999"
 
-# Collector bucket name in the awsdq account
+# Collector bucket name in the collector account
 # This bucket must already exist and have proper cross-account permissions
 collector_bucket_name = "s3-terra-inventory"
 

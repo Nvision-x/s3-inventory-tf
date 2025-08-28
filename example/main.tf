@@ -17,7 +17,7 @@ provider "aws" {
   region = var.aws_region
 
   # Optional: Use AWS profile for authentication
-  # profile = "aws01"
+  # profile = "source-account-1"
 
   # Optional: Assume role configuration
   # assume_role {
@@ -36,7 +36,7 @@ module "s3_inventory" {
   # If empty or file doesn't exist, will scan all buckets in aws_region
   bucket_list_file = var.bucket_list_file
 
-  # Collector account configuration (awsdq account)
+  # Collector account configuration
   collector_account_id    = var.collector_account_id
   collector_bucket_name   = var.collector_bucket_name
   collector_bucket_region = var.collector_bucket_region

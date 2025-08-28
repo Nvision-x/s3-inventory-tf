@@ -13,7 +13,7 @@ variable "bucket_list_file" {
 }
 
 variable "collector_account_id" {
-  description = "The AWS account ID where the collector bucket resides (awsdq account)"
+  description = "The AWS account ID where the collector bucket resides"
   type        = string
   # No default - must be provided
 }
