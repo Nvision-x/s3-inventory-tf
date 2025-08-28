@@ -1,0 +1,35 @@
+# Example Terraform variables for calling the S3 inventory module
+# Copy this file to terraform.tfvars and update with your actual values
+
+# AWS region configuration
+# This is used as the default region for buckets without explicit regions
+# or to scan all buckets in this region if bucket_list_file is empty
+aws_region = "eu-central-1"
+
+# Path to the bucket list file
+# Leave as default to use buckets.txt in current directory
+# Set to empty string "" to scan all buckets in aws_region
+bucket_list_file = "buckets.txt"
+
+# Collector account configuration (AWSDQ account)
+# Replace with your actual awsdq account ID
+collector_account_id = "999999999999"
+
+# Collector bucket name in the awsdq account
+# This bucket must already exist and have proper cross-account permissions
+collector_bucket_name = "s3-terra-inventory"
+
+# Region where the collector bucket is located
+collector_bucket_region = "eu-central-1"
+
+# Optional: Environment configuration
+# Uncomment to use environment-specific settings
+# environment = "production"
+
+# Optional: Source account ID for assume role scenarios
+# Uncomment and set if using cross-account role assumption
+# source_account_id = "111111111111"
+
+# Source account name/alias for inventory path organization
+# This will be used in the inventory path: collector-bucket/region/source-account-name/source-bucket/data
+source_account_name = "aws01"

@@ -1,0 +1,55 @@
+# Example bucket list file for S3 inventory configuration
+# Format: bucket-name region
+# Lines starting with # are ignored (comments)
+# Empty lines are also ignored
+
+# Production buckets in US East
+prod-application-data us-east-1
+prod-user-uploads us-east-1
+prod-static-assets us-east-1
+prod-backup-data us-east-1
+
+# Production buckets in EU (GDPR compliance)
+prod-eu-user-data eu-central-1
+prod-eu-application-logs eu-central-1
+prod-eu-backups eu-central-1
+
+# Staging environment buckets
+staging-application-data us-west-2
+staging-user-uploads us-west-2
+staging-test-data us-west-2
+
+# Development environment buckets
+dev-application-data us-west-2
+dev-test-uploads us-west-2
+
+# Asia Pacific region buckets
+apac-content-delivery ap-southeast-1
+apac-user-data ap-southeast-1
+
+# Disaster recovery buckets
+dr-backup-primary eu-west-1
+dr-backup-secondary us-west-1
+
+# Buckets without explicit regions will use the aws_region variable value
+# These will default to the region specified in terraform.tfvars
+shared-logs
+shared-monitoring
+shared-metrics
+compliance-audit-logs
+
+# Archive buckets with Glacier storage
+archive-2023 us-east-1
+archive-2022 us-east-1
+archive-2021 us-east-1
+
+# Media and content buckets
+media-images us-east-1
+media-videos us-east-1
+media-documents eu-central-1
+
+# Analytics and data processing
+analytics-raw-data us-east-1
+analytics-processed us-east-1
+ml-training-data us-west-2
+ml-models us-west-2

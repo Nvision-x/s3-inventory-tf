@@ -1,0 +1,12 @@
+# Example bucket configuration file
+# Format: bucket-name region
+# Lines starting with # are comments
+
+nvisionx-s3-upload-test us-east-1
+test-reports-nvisionx us-east-1
+nvnx-record-upload us-east-2
+
+# You can add buckets from any AWS region:
+# my-eu-bucket eu-west-1
+# my-asia-bucket ap-southeast-1
+# my-sydney-bucket ap-southeast-2
