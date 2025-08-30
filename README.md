@@ -8,8 +8,7 @@ The goal of this module is to provide centralized visibility across S3 assets in
 
 - 🔍 **Discovering** all S3 buckets that exist in a specific region OR from a provided bucket list
 - 📥 **Generating a CSV report** of those buckets
-- ✅ **Checking each bucket** for an existing inventory configuration named `terra-s3-inv`
-- 🏗️ **Creating the inventory configuration** if it's missing
+- 🏗️ **Creating or updating the inventory configuration** named `daily-inventory` on each bucket
 - 📤 **Delivering inventory reports** to a central collector bucket
 
 ## 🏗️ Architecture
@@ -29,19 +28,20 @@ The goal of this module is to provide centralized visibility across S3 assets in
          └───────────────────────┼───────────────────────┘
                                  │
                                  ▼
-                    ┌─────────────────────────┐
-                    │    Collector Account    │
-                    │                         │
-                    │  Collector Bucket:      │
-                    │  s3-terra-inventory     │
-                    │                         │
-                    │  └── account-1/         │
-                    │      └── bucket-a/      │
-                    │      └── bucket-b/      │
-                    │  └── account-2/         │
-                    │      └── bucket-x/      │
-                    │      └── bucket-y/      │
-                    └─────────────────────────┘
+                    ┌─────────────────────────----┐
+                    │    Collector Account        │
+                    │                             │
+                    │  Regional Collector Buckets:│
+                    │  s3-inventory-us-east-1     │
+                    │  s3-inventory-eu-west-1     │
+                    │                             │
+                    │  └── account-1/             │
+                    │      └── bucket-a/          │
+                    │      └── bucket-b/          │
+                    │  └── account-2/             │
+                    │      └── bucket-x/          │
+                    │      └── bucket-y/          │
+                    └─────────────────────────----┘
 ```
 
 ## ⚙️ How It Works
@@ -55,8 +55,8 @@ The goal of this module is to provide centralized visibility across S3 assets in
      - **File-based**: Reads bucket names and regions from a specified file
      - **Region-based**: Scans all buckets in the specified AWS region (fallback)
    - **Inventory Setup**:
-     - Checks if `terra-s3-inv` inventory configuration exists
-     - Creates configuration pointing to collector bucket
+     - Creates or updates `terra-s3-inv` inventory configuration
+     - Configuration points to regional collector bucket
    - **Cross-Account Delivery**:
      - S3 service handles secure delivery to collector bucket
 
@@ -73,22 +73,17 @@ The goal of this module is to provide centralized visibility across S3 assets in
 
 ## 🚀 Setup Instructions
 
-### Step 1: Deploy Collector Bucket in Collector Account
+### Step 1: Configure Collector Account Permissions
 
-First, set up the centralized collector bucket in your collector account:
+The module automatically creates regional collector buckets with the naming pattern:
+`{collector_bucket_prefix}-{region}`
 
-```bash
-cd collector-bucket/
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your source account IDs
-terraform init
-terraform plan
-terraform apply
-```
+For example, if `collector_bucket_prefix = "s3-inventory"`, buckets will be created as:
+- `s3-inventory-us-east-1`
+- `s3-inventory-eu-west-1`
+- etc.
 
-Note the outputs:
-- `collector_bucket_name`
-- `collector_account_id`
+Ensure the collector account has proper permissions to receive inventory from source accounts.
 
 ### Step 2: Deploy Inventory Configuration in Each Source Account
 
@@ -106,7 +101,8 @@ For each source account:
 
 3. Edit `terraform.tfvars`:
    - Set `collector_account_id` to the collector account ID
-   - Set `collector_bucket_name` to match the bucket created in Step 1
+   - Set `collector_bucket_prefix` for regional bucket naming
+   - Set `source_account_id` to identify the source account
    - Configure `aws_region` for the buckets you want to inventory
 
 4. Deploy the configuration:
@@ -266,16 +262,11 @@ module "s3_inventory" {
 ### For Collector Account
 
 ```hcl
-# collector-bucket/terraform.tfvars
+# terraform.tfvars for collector configuration
 aws_region = "eu-central-1"
-collector_bucket_name = "s3-terra-inventory-collector"
-source_account_ids = [
-  "111111111111",  # source account 1
-  "222222222222",  # source account 2
-  "333333333333"   # source account 3
-]
-environment = "production"
-inventory_retention_days = 90
+collector_bucket_prefix = "s3-inventory"  # Creates s3-inventory-{region} buckets
+collector_account_id = "999999999999"
+source_account_id = "111111111111"  # The source AWS account ID
 ```
 
 ### For Source Accounts
@@ -285,8 +276,8 @@ inventory_retention_days = 90
 aws_region = "eu-central-1"
 bucket_list_file = "buckets.txt"  # Optional
 collector_account_id = "999999999999"  # collector account ID
-collector_bucket_name = "s3-terra-inventory-collector"
-collector_bucket_region = "eu-central-1"
+collector_bucket_prefix = "s3-inventory"  # Creates regional buckets
+source_account_id = "111111111111"  # Source AWS account ID
 ```
 
 ## 🚨 Important Notes
@@ -294,6 +285,8 @@ collector_bucket_region = "eu-central-1"
 > **File Priority**: If `buckets.txt` exists and is not empty, it takes precedence over region scanning
 
 > **Region Fallback**: Buckets without specified regions use the `aws_region` variable
+
+> **Regional Buckets**: Due to S3 inventory limitations, collector buckets are created per region
 
 > **Error Handling**: Invalid bucket names or inaccessible regions will cause the operation to fail
 

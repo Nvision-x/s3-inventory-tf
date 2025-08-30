@@ -21,16 +21,10 @@ variable "collector_account_id" {
   type        = string
 }
 
-variable "collector_bucket_name" {
-  description = "The name of the S3 bucket in the collector account to store inventory data"
+variable "collector_bucket_prefix" {
+  description = "The prefix for regional collector buckets (e.g., 'nvisionx-s3-inventory' creates 'nvisionx-s3-inventory-us-east-1')"
   type        = string
-  default     = "s3-terra-inventory"
-}
-
-variable "collector_bucket_region" {
-  description = "The AWS region where the collector bucket resides"
-  type        = string
-  default     = "eu-central-1"
+  default     = "nvisionx-s3-inventory"
 }
 
 variable "source_account_id" {
@@ -59,11 +53,25 @@ variable "schedule_frequency" {
 variable "output_format" {
   description = "Output format for inventory files (CSV, ORC, or Parquet)"
   type        = string
-  default     = "CSV"
+  default     = "Parquet"
 }
 
 variable "enabled" {
   description = "Whether inventory configuration is enabled"
   type        = bool
   default     = true
+}
+
+variable "enable_bucket_discovery" {
+  description = "Enable automatic discovery of S3 buckets when bucket_list_file is empty and bucket_names is not provided"
+  type        = bool
+  default     = true
+}
+
+variable "discovery_regions" {
+  description = "List of AWS regions to scan for S3 buckets during automatic discovery"
+  type        = list(string)
+  default     = [
+    "us-east-2"
+  ]
 }

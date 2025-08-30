@@ -5,6 +5,7 @@
 nvisionx-s3-upload-test us-east-1
 test-reports-nvisionx us-east-1
 nvnx-record-upload us-east-2
+rexai-os-backup us-east-1
 
 # You can add buckets from any AWS region:
 # my-eu-bucket eu-west-1

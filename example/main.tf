@@ -26,6 +26,10 @@ provider "aws" {
 }
 
 # Call the S3 inventory module
+# IMPORTANT: Due to S3 inventory cross-region limitations, the collector bucket
+# must be in the same region as the source buckets. The collector module creates
+# regional buckets with naming pattern: ${prefix}-${region}
+# For example: nvisionx-s3-inventory-us-east-1, nvisionx-s3-inventory-us-east-2
 module "s3_inventory" {
   source = "../" # Path to the s3-inventory-tf module
 
@@ -38,15 +42,17 @@ module "s3_inventory" {
 
   # Collector account configuration
   collector_account_id    = var.collector_account_id
-  collector_bucket_name   = var.collector_bucket_name
-  collector_bucket_region = var.collector_bucket_region
+  collector_bucket_prefix = var.collector_bucket_prefix # Used to build regional bucket names
 
   # Source account ID for inventory path organization
   source_account_id = var.source_account_id
+  inventory_name    = "daily-inventory"
+  output_format     = "Parquet"
 }
 
-# Example: Multiple region deployments
-# Uncomment to deploy inventory for multiple regions
+# Example: Multiple region deployments (if not using main-dynamic.tf)
+# The main-dynamic.tf already handles multi-region automatically based on buckets.txt
+# Use these examples only if you need manual control per region
 
 # module "s3_inventory_us_east_1" {
 #   source = "../"
@@ -54,8 +60,7 @@ module "s3_inventory" {
 #   aws_region              = "us-east-1"
 #   bucket_list_file        = "buckets-us-east-1.txt"
 #   collector_account_id    = var.collector_account_id
-#   collector_bucket_name   = var.collector_bucket_name
-#   collector_bucket_region = var.collector_bucket_region
+#   collector_bucket_prefix = "nvisionx-s3-inventory"  # Creates nvisionx-s3-inventory-us-east-1
 #   source_account_id       = var.source_account_id
 # }
 # 
@@ -65,8 +70,7 @@ module "s3_inventory" {
 #   aws_region              = "eu-west-1"
 #   bucket_list_file        = "buckets-eu-west-1.txt"
 #   collector_account_id    = var.collector_account_id
-#   collector_bucket_name   = var.collector_bucket_name
-#   collector_bucket_region = var.collector_bucket_region
+#   collector_bucket_prefix = "nvisionx-s3-inventory"  # Creates nvisionx-s3-inventory-eu-west-1
 #   source_account_id       = var.source_account_id
 # }
 
@@ -83,7 +87,6 @@ module "s3_inventory" {
 #   
 #   # Use different collector buckets per environment
 #   collector_account_id    = var.collector_account_id
-#   collector_bucket_name   = "${var.environment}-s3-inventory"
-#   collector_bucket_region = var.collector_bucket_region
+#   collector_bucket_prefix = "${var.environment}-s3-inventory"  # Creates regional buckets like dev-s3-inventory-us-east-1
 #   source_account_id       = var.source_account_id
 # }

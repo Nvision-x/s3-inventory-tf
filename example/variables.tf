@@ -18,16 +18,10 @@ variable "collector_account_id" {
   # No default - must be provided
 }
 
-variable "collector_bucket_name" {
-  description = "The name of the S3 bucket in the collector account to store inventory data"
+variable "collector_bucket_prefix" {
+  description = "The prefix for regional collector buckets (e.g., 'nvisionx-s3-inventory' creates 'nvisionx-s3-inventory-us-east-1')"
   type        = string
-  default     = "s3-terra-inventory"
-}
-
-variable "collector_bucket_region" {
-  description = "The AWS region where the collector bucket resides"
-  type        = string
-  default     = "eu-central-1"
+  default     = "nvisionx-s3-inventory"
 }
 
 # Optional: Environment variable for environment-specific deployments

@@ -30,8 +30,8 @@ aws_region = "us-east-1"
 # Your collector account ID
 collector_account_id = "999999999999"
 
-# Your collector bucket name
-collector_bucket_name = "my-s3-inventory-collector"
+# Your collector bucket prefix (regional buckets will be created)
+collector_bucket_prefix = "my-s3-inventory"
 
 # Path to your bucket list
 bucket_list_file = "buckets.txt"
@@ -71,8 +71,8 @@ module "s3_inventory" {
   aws_region              = "us-east-1"
   bucket_list_file        = "buckets.txt"
   collector_account_id    = "999999999999"
-  collector_bucket_name   = "s3-inventory-collector"
-  collector_bucket_region = "us-east-1"
+  collector_bucket_prefix = "s3-inventory"  # Creates s3-inventory-us-east-1
+  source_account_id       = "888888888888"
 }
 ```
 
@@ -85,8 +85,8 @@ module "s3_inventory_us" {
   aws_region              = "us-east-1"
   bucket_list_file        = "buckets-us.txt"
   collector_account_id    = var.collector_account_id
-  collector_bucket_name   = var.collector_bucket_name
-  collector_bucket_region = var.collector_bucket_region
+  collector_bucket_prefix = var.collector_bucket_prefix  # Creates regional buckets
+  source_account_id       = var.source_account_id
 }
 
 module "s3_inventory_eu" {
@@ -95,8 +95,8 @@ module "s3_inventory_eu" {
   aws_region              = "eu-central-1"
   bucket_list_file        = "buckets-eu.txt"
   collector_account_id    = var.collector_account_id
-  collector_bucket_name   = var.collector_bucket_name
-  collector_bucket_region = var.collector_bucket_region
+  collector_bucket_prefix = var.collector_bucket_prefix  # Creates regional buckets
+  source_account_id       = var.source_account_id
 }
 ```
 
@@ -114,8 +114,8 @@ module "s3_inventory" {
   
   # Different collector buckets per environment  
   collector_account_id    = var.collector_account_id
-  collector_bucket_name   = "${var.environment}-s3-inventory"
-  collector_bucket_region = var.collector_bucket_region
+  collector_bucket_prefix = "${var.environment}-s3-inventory"  # Creates regional buckets
+  source_account_id       = var.source_account_id
 }
 ```
 
@@ -131,8 +131,8 @@ module "s3_inventory" {
   bucket_list_file = ""
   
   collector_account_id    = var.collector_account_id
-  collector_bucket_name   = var.collector_bucket_name
-  collector_bucket_region = var.collector_bucket_region
+  collector_bucket_prefix = var.collector_bucket_prefix  # Creates regional buckets
+  source_account_id       = var.source_account_id
 }
 ```
 
@@ -163,8 +163,8 @@ inputs = {
   aws_region              = "us-east-1"
   bucket_list_file        = "buckets.txt"
   collector_account_id    = get_env("COLLECTOR_ACCOUNT_ID")
-  collector_bucket_name   = "s3-inventory-collector"
-  collector_bucket_region = "us-east-1"
+  collector_bucket_prefix = "s3-inventory"  # Creates s3-inventory-us-east-1
+  source_account_id       = get_env("SOURCE_ACCOUNT_ID")
 }
 ```
 
@@ -195,10 +195,10 @@ default-region-bucket
    - Configure S3 inventory
    - Access the specified buckets
 
-2. **Collector Bucket**: The collector bucket must:
-   - Already exist in the collector account
-   - Have proper cross-account permissions
-   - Accept inventory from your source account
+2. **Collector Buckets**: Regional collector buckets are created automatically:
+   - Named as `{prefix}-{region}` (e.g., `s3-inventory-us-east-1`)
+   - Must have proper cross-account permissions in the collector account
+   - Each region gets its own collector bucket due to S3 inventory limitations
 
 3. **File Priority**: If `buckets.txt` exists and contains buckets, it takes precedence over region scanning
 
