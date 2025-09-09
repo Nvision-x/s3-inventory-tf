@@ -49,6 +49,7 @@ The goal of this module is to provide centralized visibility across S3 assets in
 1. **Deploy Collector Bucket** (One-time setup in collector account):
    - Creates a central S3 bucket with cross-account permissions
    - Configures bucket policies to accept inventory from source accounts
+   - Applies necessary read permissions for cross-account inventory delivery
 
 2. **Deploy Inventory Configuration** (In each source account):
    - **Bucket Discovery**:
@@ -57,6 +58,9 @@ The goal of this module is to provide centralized visibility across S3 assets in
    - **Inventory Setup**:
      - Creates or updates `terra-s3-inv` inventory configuration
      - Configuration points to regional collector bucket
+   - **Bucket Policy Updates**:
+     - Automatically adds read permissions for S3 inventory service
+     - Grants collector account access to source buckets for reading contents.
    - **Cross-Account Delivery**:
      - S3 service handles secure delivery to collector bucket
 
@@ -287,6 +291,10 @@ source_account_id = "111111111111"  # Source AWS account ID
 > **Region Fallback**: Buckets without specified regions use the `aws_region` variable
 
 > **Regional Buckets**: Due to S3 inventory limitations, collector buckets are created per region
+
+> **Bucket Policies**: The module automatically updates source bucket policies to grant:
+> - Read permissions for the S3 inventory service
+> - Cross-account access for the collector account to read bucket contents
 
 > **Error Handling**: Invalid bucket names or inaccessible regions will cause the operation to fail
 
