@@ -38,20 +38,38 @@ locals {
     }
     if trimspace(line) != "" && !startswith(trimspace(line), "#")
   ] : []
-  
+
   # Check if we should enable bucket discovery
   # Discovery is enabled when:
   # 1. enable_bucket_discovery is true
   # 2. No valid bucket entries in file (only comments or empty)
   # 3. No bucket_names provided via variable
   should_discover = var.enable_bucket_discovery && length(local.bucket_entries_from_file) == 0 && length(var.bucket_names) == 0
+
+  all_optional_fields = [
+    "Size",
+    "LastModifiedDate",
+    "StorageClass",
+    "ETag",
+    "IsMultipartUploaded",
+    "ReplicationStatus",
+    "EncryptionStatus",
+    "ObjectLockRetainUntilDate",
+    "ObjectLockMode",
+    "ObjectLockLegalHoldStatus",
+    "IntelligentTieringAccessTier",
+    "BucketKeyStatus",
+    "ChecksumAlgorithm",
+    "ObjectAccessControlList",
+    "ObjectOwner"
+  ]
 }
 
 data "external" "discover_buckets" {
   count = local.should_discover ? 1 : 0
-  
+
   program = ["bash", "${path.module}/scripts/discover-buckets.sh"]
-  
+
   query = {
     regions = join(",", var.discovery_regions)
   }
@@ -67,7 +85,7 @@ locals {
     for bucket in var.bucket_names :
     bucket => var.aws_region
   }
-  
+
   # Discovered buckets from external data source
   bucket_map_from_discovery = try(data.external.discover_buckets[0].result, {})
 
@@ -207,7 +225,8 @@ resource "aws_s3_bucket_inventory" "us_east_1" {
     }
   }
 
-  enabled = var.enabled
+  enabled         = var.enabled
+  optional_fields = local.all_optional_fields
 }
 
 resource "aws_s3_bucket_policy" "us_east_2" {
@@ -263,7 +282,8 @@ resource "aws_s3_bucket_inventory" "us_east_2" {
     }
   }
 
-  enabled = var.enabled
+  enabled         = var.enabled
+  optional_fields = local.all_optional_fields
 }
 
 resource "aws_s3_bucket_policy" "us_west_1" {
@@ -319,7 +339,8 @@ resource "aws_s3_bucket_inventory" "us_west_1" {
     }
   }
 
-  enabled = var.enabled
+  enabled         = var.enabled
+  optional_fields = local.all_optional_fields
 }
 
 resource "aws_s3_bucket_policy" "us_west_2" {
@@ -375,7 +396,8 @@ resource "aws_s3_bucket_inventory" "us_west_2" {
     }
   }
 
-  enabled = var.enabled
+  enabled         = var.enabled
+  optional_fields = local.all_optional_fields
 }
 
 resource "aws_s3_bucket_policy" "eu_west_1" {
@@ -431,7 +453,8 @@ resource "aws_s3_bucket_inventory" "eu_west_1" {
     }
   }
 
-  enabled = var.enabled
+  enabled         = var.enabled
+  optional_fields = local.all_optional_fields
 }
 
 resource "aws_s3_bucket_policy" "eu_west_2" {
@@ -487,7 +510,8 @@ resource "aws_s3_bucket_inventory" "eu_west_2" {
     }
   }
 
-  enabled = var.enabled
+  enabled         = var.enabled
+  optional_fields = local.all_optional_fields
 }
 
 resource "aws_s3_bucket_policy" "eu_central_1" {
@@ -543,7 +567,8 @@ resource "aws_s3_bucket_inventory" "eu_central_1" {
     }
   }
 
-  enabled = var.enabled
+  enabled         = var.enabled
+  optional_fields = local.all_optional_fields
 }
 
 resource "aws_s3_bucket_policy" "ap_south_1" {
@@ -599,7 +624,8 @@ resource "aws_s3_bucket_inventory" "ap_south_1" {
     }
   }
 
-  enabled = var.enabled
+  enabled         = var.enabled
+  optional_fields = local.all_optional_fields
 }
 
 resource "aws_s3_bucket_policy" "ap_southeast_1" {
@@ -655,7 +681,8 @@ resource "aws_s3_bucket_inventory" "ap_southeast_1" {
     }
   }
 
-  enabled = var.enabled
+  enabled         = var.enabled
+  optional_fields = local.all_optional_fields
 }
 
 resource "aws_s3_bucket_policy" "ap_southeast_2" {
@@ -711,7 +738,8 @@ resource "aws_s3_bucket_inventory" "ap_southeast_2" {
     }
   }
 
-  enabled = var.enabled
+  enabled         = var.enabled
+  optional_fields = local.all_optional_fields
 }
 
 resource "aws_s3_bucket_policy" "ap_northeast_1" {
@@ -767,7 +795,8 @@ resource "aws_s3_bucket_inventory" "ap_northeast_1" {
     }
   }
 
-  enabled = var.enabled
+  enabled         = var.enabled
+  optional_fields = local.all_optional_fields
 }
 
 resource "aws_s3_bucket_policy" "ap_northeast_2" {
@@ -823,7 +852,8 @@ resource "aws_s3_bucket_inventory" "ap_northeast_2" {
     }
   }
 
-  enabled = var.enabled
+  enabled         = var.enabled
+  optional_fields = local.all_optional_fields
 }
 
 resource "aws_s3_bucket_policy" "sa_east_1" {
@@ -879,7 +909,8 @@ resource "aws_s3_bucket_inventory" "sa_east_1" {
     }
   }
 
-  enabled = var.enabled
+  enabled         = var.enabled
+  optional_fields = local.all_optional_fields
 }
 
 resource "aws_s3_bucket_policy" "ca_central_1" {
@@ -935,7 +966,8 @@ resource "aws_s3_bucket_inventory" "ca_central_1" {
     }
   }
 
-  enabled = var.enabled
+  enabled         = var.enabled
+  optional_fields = local.all_optional_fields
 }
 
 output "configured_buckets" {
@@ -949,13 +981,13 @@ output "bucket_inventory_details" {
     {
       for bucket_name, config in aws_s3_bucket_inventory.us_east_1 :
       bucket_name => {
-        inventory_id      = config.name
-        destination       = config.destination[0].bucket[0].bucket_arn
-        collector_bucket  = "${var.collector_bucket_prefix}-us-east-1"
-        prefix            = config.destination[0].bucket[0].prefix
-        frequency         = config.schedule[0].frequency
-        enabled           = config.enabled
-        region            = "us-east-1"
+        inventory_id     = config.name
+        destination      = config.destination[0].bucket[0].bucket_arn
+        collector_bucket = "${var.collector_bucket_prefix}-us-east-1"
+        prefix           = config.destination[0].bucket[0].prefix
+        frequency        = config.schedule[0].frequency
+        enabled          = config.enabled
+        region           = "us-east-1"
       }
     },
     {

@@ -71,7 +71,7 @@ variable "enable_bucket_discovery" {
 variable "discovery_regions" {
   description = "List of AWS regions to scan for S3 buckets during automatic discovery"
   type        = list(string)
-  default     = [
+  default = [
     "us-east-2"
   ]
 }
