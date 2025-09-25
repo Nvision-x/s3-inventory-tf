@@ -173,7 +173,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket_policy" "us_east_1" {
-  for_each = contains(keys(local.buckets_by_region), "us-east-1") ? toset(local.buckets_by_region["us-east-1"]) : toset([])
+  for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "us-east-1") ? toset(local.buckets_by_region["us-east-1"]) : toset([])
   provider = aws.us_east_1
 
   bucket = each.key
@@ -230,7 +230,7 @@ resource "aws_s3_bucket_inventory" "us_east_1" {
 }
 
 resource "aws_s3_bucket_policy" "us_east_2" {
-  for_each = contains(keys(local.buckets_by_region), "us-east-2") ? toset(local.buckets_by_region["us-east-2"]) : toset([])
+  for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "us-east-2") ? toset(local.buckets_by_region["us-east-2"]) : toset([])
   provider = aws.us_east_2
 
   bucket = each.key
@@ -287,7 +287,7 @@ resource "aws_s3_bucket_inventory" "us_east_2" {
 }
 
 resource "aws_s3_bucket_policy" "us_west_1" {
-  for_each = contains(keys(local.buckets_by_region), "us-west-1") ? toset(local.buckets_by_region["us-west-1"]) : toset([])
+  for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "us-west-1") ? toset(local.buckets_by_region["us-west-1"]) : toset([])
   provider = aws.us_west_1
 
   bucket = each.key
@@ -344,7 +344,7 @@ resource "aws_s3_bucket_inventory" "us_west_1" {
 }
 
 resource "aws_s3_bucket_policy" "us_west_2" {
-  for_each = contains(keys(local.buckets_by_region), "us-west-2") ? toset(local.buckets_by_region["us-west-2"]) : toset([])
+  for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "us-west-2") ? toset(local.buckets_by_region["us-west-2"]) : toset([])
   provider = aws.us_west_2
 
   bucket = each.key
@@ -401,7 +401,7 @@ resource "aws_s3_bucket_inventory" "us_west_2" {
 }
 
 resource "aws_s3_bucket_policy" "eu_west_1" {
-  for_each = contains(keys(local.buckets_by_region), "eu-west-1") ? toset(local.buckets_by_region["eu-west-1"]) : toset([])
+  for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "eu-west-1") ? toset(local.buckets_by_region["eu-west-1"]) : toset([])
   provider = aws.eu_west_1
 
   bucket = each.key
@@ -458,7 +458,7 @@ resource "aws_s3_bucket_inventory" "eu_west_1" {
 }
 
 resource "aws_s3_bucket_policy" "eu_west_2" {
-  for_each = contains(keys(local.buckets_by_region), "eu-west-2") ? toset(local.buckets_by_region["eu-west-2"]) : toset([])
+  for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "eu-west-2") ? toset(local.buckets_by_region["eu-west-2"]) : toset([])
   provider = aws.eu_west_2
 
   bucket = each.key
@@ -515,7 +515,7 @@ resource "aws_s3_bucket_inventory" "eu_west_2" {
 }
 
 resource "aws_s3_bucket_policy" "eu_central_1" {
-  for_each = contains(keys(local.buckets_by_region), "eu-central-1") ? toset(local.buckets_by_region["eu-central-1"]) : toset([])
+  for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "eu-central-1") ? toset(local.buckets_by_region["eu-central-1"]) : toset([])
   provider = aws.eu_central_1
 
   bucket = each.key
@@ -572,7 +572,7 @@ resource "aws_s3_bucket_inventory" "eu_central_1" {
 }
 
 resource "aws_s3_bucket_policy" "ap_south_1" {
-  for_each = contains(keys(local.buckets_by_region), "ap-south-1") ? toset(local.buckets_by_region["ap-south-1"]) : toset([])
+  for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "ap-south-1") ? toset(local.buckets_by_region["ap-south-1"]) : toset([])
   provider = aws.ap_south_1
 
   bucket = each.key
@@ -629,7 +629,7 @@ resource "aws_s3_bucket_inventory" "ap_south_1" {
 }
 
 resource "aws_s3_bucket_policy" "ap_southeast_1" {
-  for_each = contains(keys(local.buckets_by_region), "ap-southeast-1") ? toset(local.buckets_by_region["ap-southeast-1"]) : toset([])
+  for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "ap-southeast-1") ? toset(local.buckets_by_region["ap-southeast-1"]) : toset([])
   provider = aws.ap_southeast_1
 
   bucket = each.key
@@ -686,7 +686,7 @@ resource "aws_s3_bucket_inventory" "ap_southeast_1" {
 }
 
 resource "aws_s3_bucket_policy" "ap_southeast_2" {
-  for_each = contains(keys(local.buckets_by_region), "ap-southeast-2") ? toset(local.buckets_by_region["ap-southeast-2"]) : toset([])
+  for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "ap-southeast-2") ? toset(local.buckets_by_region["ap-southeast-2"]) : toset([])
   provider = aws.ap_southeast_2
 
   bucket = each.key
@@ -743,7 +743,7 @@ resource "aws_s3_bucket_inventory" "ap_southeast_2" {
 }
 
 resource "aws_s3_bucket_policy" "ap_northeast_1" {
-  for_each = contains(keys(local.buckets_by_region), "ap-northeast-1") ? toset(local.buckets_by_region["ap-northeast-1"]) : toset([])
+  for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "ap-northeast-1") ? toset(local.buckets_by_region["ap-northeast-1"]) : toset([])
   provider = aws.ap_northeast_1
 
   bucket = each.key
@@ -800,7 +800,7 @@ resource "aws_s3_bucket_inventory" "ap_northeast_1" {
 }
 
 resource "aws_s3_bucket_policy" "ap_northeast_2" {
-  for_each = contains(keys(local.buckets_by_region), "ap-northeast-2") ? toset(local.buckets_by_region["ap-northeast-2"]) : toset([])
+  for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "ap-northeast-2") ? toset(local.buckets_by_region["ap-northeast-2"]) : toset([])
   provider = aws.ap_northeast_2
 
   bucket = each.key
@@ -857,7 +857,7 @@ resource "aws_s3_bucket_inventory" "ap_northeast_2" {
 }
 
 resource "aws_s3_bucket_policy" "sa_east_1" {
-  for_each = contains(keys(local.buckets_by_region), "sa-east-1") ? toset(local.buckets_by_region["sa-east-1"]) : toset([])
+  for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "sa-east-1") ? toset(local.buckets_by_region["sa-east-1"]) : toset([])
   provider = aws.sa_east_1
 
   bucket = each.key
@@ -914,7 +914,7 @@ resource "aws_s3_bucket_inventory" "sa_east_1" {
 }
 
 resource "aws_s3_bucket_policy" "ca_central_1" {
-  for_each = contains(keys(local.buckets_by_region), "ca-central-1") ? toset(local.buckets_by_region["ca-central-1"]) : toset([])
+  for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "ca-central-1") ? toset(local.buckets_by_region["ca-central-1"]) : toset([])
   provider = aws.ca_central_1
 
   bucket = each.key

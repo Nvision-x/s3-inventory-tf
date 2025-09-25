@@ -75,3 +75,9 @@ variable "discovery_regions" {
     "us-east-2"
   ]
 }
+
+variable "manage_bucket_policy" {
+  description = "Whether to manage S3 bucket policies. Set to false to skip policy creation/updates."
+  type        = bool
+  default     = false
+}
