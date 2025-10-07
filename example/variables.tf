@@ -42,3 +42,9 @@ variable "source_account_id" {
   type        = string
   # No default - must be provided
 }
+
+variable "manage_bucket_policy" {
+  description = "Whether to manage S3 bucket policies. Set to false to skip policy creation/updates."
+  type        = bool
+  default     = false
+}

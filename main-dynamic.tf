@@ -4,6 +4,8 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = ">= 4.0"
+      # Provider aliases are now optional - only pass the ones you need
+      # Users should define providers for regions where they have buckets
       configuration_aliases = [
         aws.us_east_1,
         aws.us_east_2,
@@ -102,75 +104,8 @@ locals {
   unique_regions = toset(values(local.all_buckets_to_configure))
 }
 
-provider "aws" {
-  alias  = "us_east_1"
-  region = "us-east-1"
-}
-
-provider "aws" {
-  alias  = "us_east_2"
-  region = "us-east-2"
-}
-
-provider "aws" {
-  alias  = "us_west_1"
-  region = "us-west-1"
-}
-
-provider "aws" {
-  alias  = "us_west_2"
-  region = "us-west-2"
-}
-
-provider "aws" {
-  alias  = "eu_west_1"
-  region = "eu-west-1"
-}
-
-provider "aws" {
-  alias  = "eu_west_2"
-  region = "eu-west-2"
-}
-
-provider "aws" {
-  alias  = "eu_central_1"
-  region = "eu-central-1"
-}
-
-provider "aws" {
-  alias  = "ap_south_1"
-  region = "ap-south-1"
-}
-
-provider "aws" {
-  alias  = "ap_southeast_1"
-  region = "ap-southeast-1"
-}
-
-provider "aws" {
-  alias  = "ap_southeast_2"
-  region = "ap-southeast-2"
-}
-
-provider "aws" {
-  alias  = "ap_northeast_1"
-  region = "ap-northeast-1"
-}
-
-provider "aws" {
-  alias  = "ap_northeast_2"
-  region = "ap-northeast-2"
-}
-
-provider "aws" {
-  alias  = "sa_east_1"
-  region = "sa-east-1"
-}
-
-provider "aws" {
-  alias  = "ca_central_1"
-  region = "ca-central-1"
-}
+# Provider configurations are now expected to be passed from the root module
+# See example/providers.tf for how to configure providers when using this module
 
 resource "aws_s3_bucket_policy" "us_east_1" {
   for_each = var.manage_bucket_policy && contains(keys(local.buckets_by_region), "us-east-1") ? toset(local.buckets_by_region["us-east-1"]) : toset([])
