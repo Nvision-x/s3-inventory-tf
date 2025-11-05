@@ -7,7 +7,7 @@ This Terraform module automates S3 inventory collection from multiple AWS accoun
 The goal of this module is to provide centralized visibility across S3 assets in multiple AWS accounts by:
 
 - 🔍 **Discovering** all S3 buckets that exist in a specific region OR from a provided bucket list
-- 📥 **Generating a CSV report** of those buckets
+- 📥 **Generating a Parquet report** of those buckets
 - 🏗️ **Creating or updating the inventory configuration** named `daily-inventory` on each bucket
 - 📤 **Delivering inventory reports** to a central collector bucket
 
