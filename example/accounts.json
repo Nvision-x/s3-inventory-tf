@@ -1,0 +1,35 @@
+{
+  "collector_account_id": "022787320932",
+  "collector_bucket_prefix": "nvisionx-s3-inventory",
+  "accounts": [
+    {
+      "account_id": "111111111111",
+      "name": "staging",
+      "oidc_role": "NxGitHubActionsRole",
+      "backend": {
+        "bucket": "tf-state-staging-east-2",
+        "key": "s3-inventory/terraform.tfstate",
+        "region": "us-east-2"
+      },
+      "buckets": [
+        {"name": "my-upload-bucket", "region": "us-east-1"},
+        {"name": "my-reports-bucket", "region": "us-east-1"},
+        {"name": "my-records-bucket", "region": "us-east-2"}
+      ]
+    },
+    {
+      "account_id": "222222222222",
+      "name": "production",
+      "oidc_role": "NxGitHubActionsRole",
+      "backend": {
+        "bucket": "tf-state-prod-east-1",
+        "key": "s3-inventory/terraform.tfstate",
+        "region": "us-east-1"
+      },
+      "buckets": [
+        {"name": "prod-data-lake", "region": "us-east-1"},
+        {"name": "prod-logs", "region": "us-east-1"}
+      ]
+    }
+  ]
+}

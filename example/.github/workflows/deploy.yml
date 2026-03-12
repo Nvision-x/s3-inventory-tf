@@ -1,0 +1,65 @@
+name: Deploy S3 Inventory
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "accounts.json"
+      - "main.tf"
+      - "variables.tf"
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # Build a matrix from accounts.json so each account runs in parallel
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      accounts: ${{ steps.parse.outputs.accounts }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: parse
+        run: |
+          echo "accounts=$(jq -c '[.accounts[] | {account_id, name, oidc_role, backend}]' accounts.json)" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        account: ${{ fromJson(needs.matrix.outputs.accounts) }}
+
+    name: ${{ matrix.account.name }} (${{ matrix.account.account_id }})
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ matrix.account.account_id }}:role/${{ matrix.account.oidc_role }}
+          aws-region: ${{ matrix.account.backend.region }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.9"
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ matrix.account.backend.bucket }}" \
+            -backend-config="key=${{ matrix.account.backend.key }}" \
+            -backend-config="region=${{ matrix.account.backend.region }}"
+
+      - name: Terraform Plan
+        run: terraform plan -var="source_account_id=${{ matrix.account.account_id }}" -out=tfplan
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply tfplan
