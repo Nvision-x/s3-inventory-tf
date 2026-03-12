@@ -28,7 +28,7 @@ permissions:
 #     name: Scan S3 in ${{ matrix.region }}
 #     steps:
 #       - name: Checkout
-#         uses: actions/checkout@v3
+#         uses: actions/checkout@v4
 
 jobs:
   terraform:
@@ -59,7 +59,7 @@ jobs:
       run: terraform plan -input=false
 
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v3
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
