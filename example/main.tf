@@ -1,5 +1,12 @@
-# Example Terraform configuration that calls the S3 inventory module
-# This demonstrates how to use the module in your own Terraform projects
+# Example: how to onboard accounts
+#
+# 1. Add your account to accounts.json with bucket names and regions
+# 2. If your account uses a region not already listed below, add a
+#    provider block and a module block for that region
+# 3. Run: terraform plan -var="source_account_id=111111111111"
+#
+# The pipeline runs this once per account — source_account_id is passed
+# by the GitHub Actions workflow per account entry in accounts.json.
 
 terraform {
   required_version = ">= 1.3.0"
@@ -12,81 +19,80 @@ terraform {
   }
 }
 
-# Configure AWS Provider
+locals {
+  config = jsondecode(file("${path.module}/accounts.json"))
+
+  account = one([
+    for a in local.config.accounts : a
+    if a.account_id == var.source_account_id
+  ])
+
+  buckets_by_region = {
+    for region in distinct([for b in local.account.buckets : b.region]) :
+    region => [for b in local.account.buckets : b.name if b.region == region]
+  }
+}
+
+# --- Provider per region (add more as needed) ---
+
 provider "aws" {
-  region = var.aws_region
-
-  # Optional: Use AWS profile for authentication
-  # profile = "source-account-1"
-
-  # Optional: Assume role configuration
-  # assume_role {
-  #   role_arn = "arn:aws:iam::${var.source_account_id}:role/TerraformRole"
-  # }
+  alias  = "us_east_1"
+  region = "us-east-1"
 }
 
-# Call the S3 inventory module
-# IMPORTANT: Due to S3 inventory cross-region limitations, the collector bucket
-# must be in the same region as the source buckets. The collector module creates
-# regional buckets with naming pattern: ${prefix}-${region}
-# For example: nvisionx-s3-inventory-us-east-1, nvisionx-s3-inventory-us-east-2
-module "s3_inventory" {
-  source = "../" # Path to the s3-inventory-tf module
-
-  # AWS region to scan for buckets or default region for buckets in file
-  aws_region = var.aws_region
-
-  # Path to file containing bucket names and regions
-  # If empty or file doesn't exist, will scan all buckets in aws_region
-  bucket_list_file = var.bucket_list_file
-
-  # Collector account configuration
-  collector_account_id    = var.collector_account_id
-  collector_bucket_prefix = var.collector_bucket_prefix # Used to build regional bucket names
-
-  # Source account ID for inventory path organization
-  source_account_id = var.source_account_id
-  inventory_name    = "daily-inventory"
-  output_format     = "Parquet"
+provider "aws" {
+  alias  = "us_east_2"
+  region = "us-east-2"
 }
 
-# Example: Multiple region deployments (if not using main-dynamic.tf)
-# The main-dynamic.tf already handles multi-region automatically based on buckets.txt
-# Use these examples only if you need manual control per region
+# --- Module per region ---
 
-# module "s3_inventory_us_east_1" {
-#   source = "../"
-#   
-#   aws_region              = "us-east-1"
-#   bucket_list_file        = "buckets-us-east-1.txt"
-#   collector_account_id    = var.collector_account_id
-#   collector_bucket_prefix = "nvisionx-s3-inventory"  # Creates nvisionx-s3-inventory-us-east-1
-#   source_account_id       = var.source_account_id
-# }
-# 
-# module "s3_inventory_eu_west_1" {
-#   source = "../"
-#   
-#   aws_region              = "eu-west-1"
-#   bucket_list_file        = "buckets-eu-west-1.txt"
-#   collector_account_id    = var.collector_account_id
-#   collector_bucket_prefix = "nvisionx-s3-inventory"  # Creates nvisionx-s3-inventory-eu-west-1
-#   source_account_id       = var.source_account_id
-# }
+module "us_east_1" {
+  source = "../"
+  count  = contains(keys(local.buckets_by_region), "us-east-1") ? 1 : 0
 
-# Example: Environment-specific deployments
-# Uncomment to use different configurations per environment
+  region                  = "us-east-1"
+  buckets                 = local.buckets_by_region["us-east-1"]
+  collector_account_id    = local.config.collector_account_id
+  collector_bucket_prefix = local.config.collector_bucket_prefix
+  source_account_id       = var.source_account_id
 
-# module "s3_inventory_env" {
-#   source = "../"
-  
-#   aws_region = var.aws_region
-  
-#   # Use different bucket lists per environment
-#   bucket_list_file = var.environment == "production" ? "buckets-prod.txt" : "buckets-dev.txt"
-  
-#   # Use different collector buckets per environment
-#   collector_account_id    = var.collector_account_id
-#   collector_bucket_prefix = "${var.environment}-s3-inventory"  # Creates regional buckets like dev-s3-inventory-us-east-1
-#   source_account_id       = var.source_account_id
-# }
+  providers = {
+    aws = aws.us_east_1
+  }
+}
+
+module "us_east_2" {
+  source = "../"
+  count  = contains(keys(local.buckets_by_region), "us-east-2") ? 1 : 0
+
+  region                  = "us-east-2"
+  buckets                 = local.buckets_by_region["us-east-2"]
+  collector_account_id    = local.config.collector_account_id
+  collector_bucket_prefix = local.config.collector_bucket_prefix
+  source_account_id       = var.source_account_id
+
+  providers = {
+    aws = aws.us_east_2
+  }
+}
+
+# --- Outputs ---
+
+output "configured_buckets" {
+  value = concat(
+    try(module.us_east_1[0].configured_buckets, []),
+    try(module.us_east_2[0].configured_buckets, [])
+  )
+}
+
+output "bucket_inventory_details" {
+  value = merge(
+    try(module.us_east_1[0].inventory_details, {}),
+    try(module.us_east_2[0].inventory_details, {})
+  )
+}
+
+output "regions_configured" {
+  value = keys(local.buckets_by_region)
+}
